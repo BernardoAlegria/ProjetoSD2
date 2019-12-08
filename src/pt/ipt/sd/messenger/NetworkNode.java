@@ -14,6 +14,7 @@ import Miners.DistributedMiner;
 import static Miners.Miner.mine;
 import java.rmi.RemoteException;
 import java.security.Key;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.DefaultListModel;
@@ -23,7 +24,7 @@ import myUtils.RMI;
  *
  * @author Bernardo
  */
-public class NetworkNode extends javax.swing.JFrame {
+public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
   
     IRemoteNetNode remoteNode;
     Key remoteAES;
@@ -88,6 +89,8 @@ public class NetworkNode extends javax.swing.JFrame {
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
         jLabel5 = new javax.swing.JLabel();
+        jScrollPane5 = new javax.swing.JScrollPane();
+        txtServiceBlock = new javax.swing.JTextArea();
         jPanel9 = new javax.swing.JPanel();
         jScrollPane2 = new javax.swing.JScrollPane();
         txtDisplay = new javax.swing.JTextArea();
@@ -195,6 +198,10 @@ public class NetworkNode extends javax.swing.JFrame {
 
         jLabel5.setText("CartaReceiver");
 
+        txtServiceBlock.setColumns(20);
+        txtServiceBlock.setRows(5);
+        jScrollPane5.setViewportView(txtServiceBlock);
+
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
@@ -217,7 +224,9 @@ public class NetworkNode extends javax.swing.JFrame {
                                     .addComponent(jLabel5))
                                 .addGap(0, 27, Short.MAX_VALUE)))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 191, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 191, Short.MAX_VALUE)
+                            .addComponent(jScrollPane5)))
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addGap(0, 0, Short.MAX_VALUE)))
@@ -228,8 +237,7 @@ public class NetworkNode extends javax.swing.JFrame {
             .addGroup(jPanel8Layout.createSequentialGroup()
                 .addComponent(jLabel1)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(txtType, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(4, 4, 4)
@@ -241,15 +249,19 @@ public class NetworkNode extends javax.swing.JFrame {
                         .addGap(1, 1, 1)
                         .addComponent(txtReceiver, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(jLabel4)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel4))
+                    .addComponent(jScrollPane1))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel8Layout.createSequentialGroup()
                         .addComponent(txtCardGiver, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addGap(4, 4, 4)
                         .addComponent(jLabel5)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(txtCardReceiver, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 29, Short.MAX_VALUE)
-                        .addComponent(btServiceAddBlock, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(btServiceAddBlock, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jScrollPane5))
                 .addContainerGap())
         );
 
@@ -344,27 +356,22 @@ public class NetworkNode extends javax.swing.JFrame {
     }//GEN-LAST:event_btConnectActionPerformed
 
     private void btServiceAddBlockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btServiceAddBlockActionPerformed
-        try {
-            //dados para a criação da Transaction:
-//        String type = txtType.getText();
-//        String giver = txtGiver.getText();
-//        String receiver = txtReceiver.getText();
-//        String cardGiver = txtCardGiver.getText();
-//        String cardReceiver = txtCardReceiver.getText();
+        
         displayMessage("blockchain: ", "adding Block");
+        //TODO
+        //transaction para testar, tem de ir buscar dados à interface mais tarde
         Transaction tr = new Transaction("",player1,player2,card1,card2);
             try {
                 Block blk = myNode.myBlockChain.getNewBlock(tr);
-                DistributedMiner
+                myNode.mine(blk);
+                myNode.addBlock(blk);
+                txtServiceBlock.setText(myBlockChain.getLastBlock());
             } catch (Exception ex) {
+                displayLog("erro ao adicionar bloco", ex);
                 Logger.getLogger(NetworkNode.class.getName()).log(Level.SEVERE, null, ex);
             }
-        myNode.addBlock(tr);
         displayMessage("blockchain: ", "Block Ready!");
-        } catch (RemoteException ex) {
-            displayLog("erro ao adicionar bloco", ex);
-            Logger.getLogger(NetworkNode.class.getName()).log(Level.SEVERE, null, ex);
-        }
+        
     }//GEN-LAST:event_btServiceAddBlockActionPerformed
 
     private void txtTypeActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_txtTypeActionPerformed
@@ -426,6 +433,7 @@ public class NetworkNode extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JScrollPane jScrollPane4;
+    private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPane2;
     private javax.swing.JTabbedPane jTabbedPane3;
@@ -443,6 +451,7 @@ public class NetworkNode extends javax.swing.JFrame {
     private javax.swing.JTextField txtReceiver;
     private javax.swing.JTextField txtServerObjName;
     private javax.swing.JTextField txtServerPort;
+    private javax.swing.JTextArea txtServiceBlock;
     private javax.swing.JTextArea txtServiceMessage;
     private javax.swing.JTextField txtType;
     // End of variables declaration//GEN-END:variables
@@ -456,10 +465,11 @@ public class NetworkNode extends javax.swing.JFrame {
     public void displayMessage(String source, String msg){
         txtDisplay.setText(txtDisplay.getText() + "\n" + source + " - " + msg);
     }
-    
+    //displayNetWork do prof.
     public void displayNodes(){
         try {
             DefaultListModel model = new DefaultListModel();
+            List<IRemoteNetNode> nodes = myNode.getNodes();
             for(IRemoteNetNode node : myNode.getNodes()){
                 model.addElement(node.getName());
             }
@@ -471,4 +481,18 @@ public class NetworkNode extends javax.swing.JFrame {
     public void displayLastNode(){
         txtServiceMessage.setText(txtServiceMessage.getText() + myBlockChain.getLastBlock().toString());
     }
+    //para o gif
+    public void setWorking(boolean state){
+        txtDisplay.setText(txtDisplay.getText() + "\n" + "miner is working!");
+    }          
+
+    @Override
+    public void onNounceFound(Block blk) {        
+        try {
+            myNode.stopMining(blk);
+        } catch (RemoteException ex) {
+            Logger.getLogger(NetworkNode.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
 }
