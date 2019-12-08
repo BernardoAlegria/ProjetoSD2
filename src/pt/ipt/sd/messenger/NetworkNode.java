@@ -479,7 +479,7 @@ public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
         }
     }
     public void displayLastNode(){
-        txtServiceMessage.setText(txtServiceMessage.getText() + myBlockChain.getLastBlock().toString());
+        txtServiceMessage.setText(txtServiceMessage.getText() +"\n"+ myBlockChain.getLastBlock().toString());
     }
     //para o gif
     public void setWorking(boolean state){
