@@ -26,6 +26,7 @@ import myUtils.RMI;
  */
 public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
   
+    //criação dos objetos
     IRemoteNetNode remoteNode;
     Key remoteAES;
     RemoteNetNode myNode;
@@ -40,7 +41,9 @@ public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
      * Creates new form NetworkNova
      */
     public NetworkNode() {
+        //construtor
         initComponents();
+        //criar a blockchain
         myBlockChain = new BlockChain();
         
         //criar jogadores, cartas e adicionar as cartas às coleções
@@ -331,9 +334,12 @@ public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
     }// </editor-fold>//GEN-END:initComponents
 
     private void btStartServerActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btStartServerActionPerformed
+        //botao inicio do servidor
+        
         try {
-            int port = Integer.valueOf(txtServerPort.getText());
-            myNode = new RemoteNetNode(port,myBlockChain, this);
+            
+            int port = Integer.valueOf(txtServerPort.getText()); //guardar o valor do porto
+            myNode = new RemoteNetNode(port,myBlockChain, this); //criação do objeto remoto
             RMI.startRemoteObject(myNode, port, RemoteNetNode.NAME);
             displayMessage("Start Server", myNode.getName() + "available");
         } catch (Exception ex) {
@@ -342,12 +348,13 @@ public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
     }//GEN-LAST:event_btStartServerActionPerformed
 
     private void btConnectActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btConnectActionPerformed
+        //conexão ao servidor
         try {
-            int port = Integer.valueOf(txtConnectPortNumber.getText());
+            int port = Integer.valueOf(txtConnectPortNumber.getText()); //guardar valor do porto
             remoteNode = (IRemoteNetNode) RMI.getRemote(
                 txtConnectAdress.getText(),
                 port, RemoteNetNode.NAME);
-            myNode.addNode(remoteNode);
+            myNode.addNode(remoteNode); //adicionar endereço e porto ao objeto remoto
 
             displayMessage("connected to: ", remoteNode.getName());
         } catch (Exception ex) {
@@ -357,15 +364,16 @@ public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
 
     private void btServiceAddBlockActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btServiceAddBlockActionPerformed
         
+        //configuração botão de adicionar um bloco
         displayMessage("blockchain: ", "adding Block");
         //TODO
         //transaction para testar, tem de ir buscar dados à interface mais tarde
         Transaction tr = new Transaction("",player1,player2,card1,card2);
             try {
-                Block blk = myNode.myBlockChain.getNewBlock(tr);
-                myNode.mine(blk);
-                myNode.addBlock(blk);
-                txtServiceBlock.setText(myBlockChain.getLastBlock());
+                Block blk = myNode.myBlockChain.getNewBlock(tr); //recebe o novo bloco a minar
+                myNode.mine(blk);//minera o bloco
+                myNode.addBlock(blk);//adiciona o bloco
+                txtServiceBlock.setText(myBlockChain.getLastBlock());//apresentao ultimo bloco da chain
             } catch (Exception ex) {
                 displayLog("erro ao adicionar bloco", ex);
                 Logger.getLogger(NetworkNode.class.getName()).log(Level.SEVERE, null, ex);
@@ -458,36 +466,43 @@ public class NetworkNode extends javax.swing.JFrame implements NounceFoundEvent{
 
 
     public void displayLog(String source, Exception ex){
+        //apresentar mensagem na caixa de texto de logs
        txtLog.setText(source + "\t " + ex.getMessage() + "\n " + txtLog.getText());
        Logger.getLogger(NetworkNode.class.getName()).log(Level.SEVERE, null, ex);
     }
 
     public void displayMessage(String source, String msg){
+        //apresentar mensagem na caixa de texto
         txtDisplay.setText(txtDisplay.getText() + "\n" + source + " - " + msg);
     }
     //displayNetWork do prof.
     public void displayNodes(){
+        //função para apresentar todos os nodes conectados
         try {
-            DefaultListModel model = new DefaultListModel();
+            DefaultListModel model = new DefaultListModel(); //criar uma lista
             List<IRemoteNetNode> nodes = myNode.getNodes();
             for(IRemoteNetNode node : myNode.getNodes()){
-                model.addElement(node.getName());
+                model.addElement(node.getName());//corre os nodes todos e adiciona na lista
             }
-        txtNodeList.setModel(model);
+        txtNodeList.setModel(model);//apresenta todos os nodes
         } catch (RemoteException ex) {
             displayLog("erro display nodes!!!!", ex);
         }
     }
     public void displayLastNode(){
+        //
         txtServiceMessage.setText(txtServiceMessage.getText() +"\n"+ myBlockChain.getLastBlock().toString());
     }
     //para o gif
     public void setWorking(boolean state){
+        //com um estado, indica que o miner esta a minerar
         txtDisplay.setText(txtDisplay.getText() + "\n" + "miner is working!");
     }          
 
     @Override
-    public void onNounceFound(Block blk) {        
+    public void onNounceFound(Block blk) {
+    //evento para que quando um mineiro encontra
+    //o nouce, recebe o aviso para parar de procurar
         try {
             myNode.stopMining(blk);
         } catch (RemoteException ex) {
