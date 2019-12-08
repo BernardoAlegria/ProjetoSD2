@@ -15,7 +15,7 @@ import java.util.Base64;
  * @author Bernardo
  */
 public class Block {
-    long nonce;
+    long nounce;
     private int size;
     protected String hash;
     private String previous;
@@ -35,7 +35,7 @@ public class Block {
     
     public String calculateHash() throws NoSuchAlgorithmException{
         MessageDigest hasher = MessageDigest.getInstance("SHA-256");
-        String msg = (previous+ fact + nonce);
+        String msg = (previous+ fact + nounce);
         byte[] hbytes = hasher.digest(msg.getBytes());
         return Base64.getEncoder().encodeToString(hbytes);
         
@@ -59,8 +59,8 @@ public class Block {
         return fact;
     }
 
-    public long getNonce() {
-        return nonce;
+    public long getNounce() {
+        return nounce;
     }
 
     //setters 
@@ -70,7 +70,7 @@ public class Block {
     }
 
     public void setNonce(long nonce) {
-        this.nonce = nonce;
+        this.nounce = nonce;
     }
 
     @Override

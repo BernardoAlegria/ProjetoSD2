@@ -10,6 +10,7 @@ import java.security.MessageDigest;
 import java.util.Base64;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.atomic.AtomicBoolean;
+import pt.ipt.sd.messenger.NounceFoundEvent;
 
 /**
  *
@@ -24,7 +25,7 @@ public class DistributedMiner {
         isWorking = new AtomicBoolean(false);
     }
     
-    public void mine(Block blk) throws Exception{
+    public void mine(Block blk, NounceFoundEvent listener) throws Exception{
             MessageDigest hasher = MessageDigest.getInstance("SHA-256");
             String prefix = String.format("%0" + blk.getSize() + "d", 0);
             isWorking.set(true);
@@ -35,7 +36,10 @@ public class DistributedMiner {
                 byte[] h = hasher.digest(msg.getBytes());
                 String txtH = Base64.getEncoder().encodeToString(h);
                 if( txtH.startsWith(prefix)){
+                    blk.setNonce(num);
                     nounce = num;
+                    //evento para parar os outros miners
+                    listener.onNounceFound(blk);
                     break;
                 }
             }

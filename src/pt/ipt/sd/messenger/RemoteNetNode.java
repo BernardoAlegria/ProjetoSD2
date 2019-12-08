@@ -169,10 +169,10 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
     }
 
     @Override
-    public void addBlock(Transaction tr) throws RemoteException {
+    public void addBlock(Block blk) throws RemoteException {
         try {
             gui.displayMessage("blockChain: ", "adicionando o bloco");
-            myBlockChain.addBlock(tr);
+            myBlockChain.addBlock(blk);
             gui.displayMessage("blockChain: ", "bloco adicionado");
             gui.displayLastNode();
         } catch (Exception ex) {
@@ -187,18 +187,54 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
     }
 
     @Override
-    public void Mine(Block b) throws RemoteException {
+    public void mine(Block b) throws RemoteException {
         try {
             if (miner.isWorking()){
                 gui.displayMessage("miner: ", "miner busy");
                 return;
             }
-            miner.mine(b);
+            gui.setWorking(true);
+           //minar de forma assincrona
+            new Thread(
+                //lambda expression
+                () -> {
+                    try {
+                        //enviar bloco para minagem para a rede
+                        for (IRemoteNetNode node : nodeList) {
+                            node.mine(b);
+                        }
+
+                        //começar a minar
+                        //setnounce?
+                        miner.mine(b, gui);
+                    } catch (Exception ex) {
+                        Logger.getLogger(RemoteNetNode.class.getName()).log(Level.SEVERE, null, ex);
+                        gui.displayLog(host, ex);
+                    }
+
+                }
+        ).start();
+            
+            //b.setNonce(miner.getNounce());
         } catch (Exception ex) {
             gui.displayLog("Miner error", ex);
             Logger.getLogger(RemoteNetNode.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
+    @Override
+    public void stopMining(Block blk) throws RemoteException{
+        gui.setWorking(false);
+        miner.stopMining();
+        //dou o bloco a minar à rede
+        System.out.println("chainSize: " + myBlockChain.getBlockchain().size());
+        if (myBlockChain.getBlockchain().contains(blk)) {
+            return;
+        }
+        myBlockChain.getBlockchain().add(blk);
+        for (IRemoteNetNode node : nodeList) {
+            node.stopMining(blk);
+        }
+    }
     
 }

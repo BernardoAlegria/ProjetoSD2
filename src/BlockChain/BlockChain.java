@@ -83,11 +83,18 @@ public class BlockChain {
         return new Block(tr, prev);
     }
     
+    //addBlock antigo
     public void addBlock(Transaction tr) throws Exception{
         String previousHash = blockchain.get(blockchain.size() - 1).getHash();
         Block blk = new Block(tr, previousHash);
         if(blk.isValid()){
             blockchain.add(blk);          
+        }
+    }
+    //addBlock quando já temos o Block
+    public void addBlock(Block blk){
+        if(blk.isValid()){
+            blockchain.add(blk);
         }
     }
 }

@@ -52,9 +52,11 @@ public interface IRemoteNetNode  extends Remote{
     
     //metodos Blockchain
     
-    public void addBlock(Transaction tr) throws RemoteException;
+    public void addBlock(Block blk) throws RemoteException;
     
     public BlockChain getBlockChain() throws RemoteException;
     
-    public void Mine(Block b) throws RemoteException;
+    public void mine(Block b) throws RemoteException;
+
+    public void stopMining(Block blk) throws RemoteException;
 }
