@@ -112,11 +112,14 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
     */
     @Override
     public void addNode(IRemoteNetNode node) throws RemoteException {
+        //adiciona o node à sua lista
         nodeList.add(node);
+        //Envia o node para todos os seus nodes que não o tenham.
         for (IRemoteNetNode iRemoteNetNode : nodeList) {
             if(!iRemoteNetNode.getNodes().contains(node))
                 iRemoteNetNode.addNode(node);
         }
+        //atualiza a lista de nodos
         gui.displayNodes();
     }
 
@@ -171,9 +174,12 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
     @Override
     public void addBlock(Block blk) throws RemoteException {
         try {
+            
             gui.displayMessage("blockChain: ", "adicionando o bloco");
+            //adiciona o bloco
             myBlockChain.addBlock(blk);
             gui.displayMessage("blockChain: ", "bloco adicionado");
+            //update na lista
             gui.displayLastNode();
         } catch (Exception ex) {
             gui.displayLog("add Block Error", ex);
@@ -189,6 +195,7 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
     @Override
     public void mine(Block b) throws RemoteException {
         try {
+            //verifica se o miner já está a trabalhar
             if (miner.isWorking()){
                 gui.displayMessage("miner: ", "miner busy");
                 return;
@@ -228,9 +235,11 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
         miner.stopMining();
         //dou o bloco a minar à rede
         System.out.println("chainSize: " + myBlockChain.getBlockchain().size());
+        //se ja adicionei o bloco à minha lista
         if (myBlockChain.getBlockchain().contains(blk)) {
             return;
         }
+        //se não tenho de adicionar e enviar aos meus nodes
         myBlockChain.getBlockchain().add(blk);
         for (IRemoteNetNode node : nodeList) {
             node.stopMining(blk);
