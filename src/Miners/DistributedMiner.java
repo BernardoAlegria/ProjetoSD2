@@ -19,7 +19,11 @@ import pt.ipt.sd.messenger.NounceFoundEvent;
 public class DistributedMiner {
     
     long nounce=0;
-    AtomicBoolean isWorking;
+    public AtomicBoolean isWorking;
+
+    public void setIsWorking(AtomicBoolean isWorking) {
+        this.isWorking = isWorking;
+    }
 
     public DistributedMiner() {
         isWorking = new AtomicBoolean(false);

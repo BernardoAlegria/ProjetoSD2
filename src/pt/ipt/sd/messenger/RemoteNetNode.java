@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import myUtils.Crypt;
@@ -202,11 +203,17 @@ public class RemoteNetNode extends UnicastRemoteObject implements IRemoteNetNode
             }
             gui.setWorking(true);
            //minar de forma assincrona
+           
+           
+           
             new Thread(
                 //lambda expression
                 () -> {
                     try {
                         //enviar bloco para minagem para a rede
+                        
+                        AtomicBoolean atBool = new AtomicBoolean(true);
+                        miner.setIsWorking(atBool);
                         for (IRemoteNetNode node : nodeList) {
                             node.mine(b);
                         }
